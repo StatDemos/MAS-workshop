@@ -100,7 +100,7 @@ table(data$`Shipping Type`,
       data$Plant)
 
 # slide number: 47
-# cluster bar chart
+# cluster bar chart - check  ---------------------------------
 data %>%
   drop_na() %>%
   ggplot(aes(x = Plant, y = `Shipping Type`, fill = `Shipping Type`)) +
@@ -110,7 +110,9 @@ data %>%
   labs(x = "Plant", 
        y = "Frequency", 
        fill = "Shipping Type", 
-       title = "Composition of the sample by Shipping Type and Plant")
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
 
 # slide number: 48
 # stacked bar chart
