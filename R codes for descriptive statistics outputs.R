@@ -1,39 +1,38 @@
 
 library(readxl)
 library(dplyr)
-library(tidyverse)
 library(ggplot2)
 library(DescTools)
 
-data <- read_xlsx("Pre Order Profitability 2023 - Selected.xlsx")
+data_descriptive <- read_xlsx("Pre Order Profitability 2023 - Descriptive.xlsx")
 
-View(data)
+View(data_descriptive)
 
-glimpse(data)
+glimpse(data_descriptive)
 
 # ------------------- Descriptive -------------------------- #
 
-# slide number: 38
-# one way frequency table
-table(data$`Shipping Type`)
-
 # slide number: 39
+# one way frequency table
+table(data_descriptive$`Shipping Type`)
+
+# slide number: 40
 # barchart
-data %>%
-  select(`Shipping Type`) %>%
-  drop_na() %>%
+data_descriptive |>
+  select(`Shipping Type`) |>
+  na.omit() |>
   ggplot(aes(x = as.factor(`Shipping Type`))) +
-  geom_bar(color="brown", 
+  geom_bar(color="black", 
            fill="brown" ) +
   theme_bw() +
   labs(title = "Composition of the sample by Shipping Type",
        x = "Shipping Type",
        y = "Frequency") 
 
-# slide number: 40
+# slide number: 41
 # pie chart
 data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
-           Frequency = c(87, 86, 937)) %>%
+           Frequency = c(87, 86, 937)) |>
   ggplot(aes(x = "",
              y = Frequency,
              fill = Shipping_Type)) +
@@ -53,57 +52,59 @@ data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
   theme(axis.line = element_blank(),
         axis.text = element_blank(),
         axis.ticks = element_blank(),
-        plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position = "bottom")
 
-# slide number: 41
+# slide number: 42
 # summary measures
 
 # mean
-mean(data$SMV, 
+mean(data_descriptive$SMV, 
      na.rm = TRUE)
 
 # median
-median(data$SMV,
+median(data_descriptive$SMV,
        na.rm = TRUE)
 
 # mode
-Mode(data$SMV, 
+Mode(data_descriptive$SMV, 
      na.rm = TRUE)
 
-# slide number: 42
+# slide number: 43
 # histogram
-data %>%
-  select(SMV) %>%
-  drop_na() %>%
+data_descriptive |>
+  select(SMV) |>
+  na.omit() |>
   ggplot(aes(x = SMV)) +
-  geom_histogram(color = "brown", 
+  geom_histogram(color = "black", 
                  fill = "brown") +
   theme_bw() +
   labs(title = "Distribution of SMV",
        x = "SMV",
        y = "Frequency")
 
-# slide number: 43
+# slide number: 44
 # boxplot
-data %>%
-  select(SMV) %>%
-  drop_na() %>%
+data_descriptive |>
+  select(SMV) |>
+  na.omit() |>
   ggplot(aes(x = SMV)) +
-  geom_boxplot(color = "brown", 
+  geom_boxplot(color = "black", 
                fill = "brown" ) +
   theme_bw() +
   labs(title = "Distribution of SMV")
 
-# slide number: 46
-# two way frequency table
-table(data$`Shipping Type`, 
-      data$Plant)
-
 # slide number: 47
-# cluster bar chart - check  ---------------------------------
-data %>%
-  drop_na() %>%
-  ggplot(aes(x = Plant, y = `Shipping Type`, fill = `Shipping Type`)) +
+# two way frequency table
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant)
+
+# slide number: 48
+# cluster bar chart
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant) |>
+  as.data.frame() |>
+  ggplot(aes(x = Var2, y = Freq, fill = Var1)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_bw() +
   scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
@@ -111,13 +112,12 @@ data %>%
        y = "Frequency", 
        fill = "Shipping Type", 
        title = "Composition of the sample by Shipping Type and Plant") +
-  theme(axis.text.y = element_blank(),
-        axis.ticks.y = element_blank())
+  theme(legend.position = "bottom")
 
-# slide number: 48
+# slide number: 49
 # stacked bar chart
-data %>%
-  drop_na() %>%
+data_descriptive |>
+  na.omit() |>
   ggplot(aes(x = Plant, y = "", fill = `Shipping Type`)) +
   geom_bar(stat = "identity") +
   theme_bw() +
@@ -125,11 +125,12 @@ data %>%
   labs(x = "Plant", 
        y = "Frequency", 
        fill = "Shipping Type", 
-       title = "Composition of the sample by Shipping Type and Plant")
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
 
-# slide number: 49
+# slide number: 50
 # scatterplot 
-data %>% 
+data_descriptive |>
   ggplot(aes(x = `Order Qty`,
              y = Earnings)) +
   geom_point(col = "brown") +
@@ -138,12 +139,12 @@ data %>%
        x = "Order Quantity",
        y = "Earnings")
 
-# slide number: 50
+# slide number: 51
 # boxplot with groups
-data %>%
+data_descriptive |>
   select(SMV, 
-         `Shipping Type`) %>%
-  drop_na() %>%
+         `Shipping Type`) |>
+  na.omit() |>
   ggplot(aes(x = SMV,
              y = `Shipping Type`,
              fill = `Shipping Type`)) +
@@ -153,49 +154,56 @@ data %>%
   labs(x = "SMV", 
        y = "Shipping Type", 
        fill = "Shipping Type", 
-       title = "Distribution of SMV by Shipping Type")
+       title = "Distribution of SMV by Shipping Type") +
+  theme(legend.position = "bottom")
 
 
 # ------------ Correlation Analysis ------------------------ #
 
 # scatterplots
 
-data %>% 
+data_descriptive |> 
+  na.omit() |>
   ggplot(aes(x = SMV,
              y = `Order Qty`)) +
   geom_point() +
   theme_bw()
 # no linear relationship
 
-data %>% 
+data_descriptive |> 
+  na.omit() |>
   ggplot(aes(x = SMV,
              y = Earnings)) +
   geom_point() +
   theme_bw()
 # no linear relationship
 
-data %>% 
+data_descriptive |>
+  na.omit() |>
   ggplot(aes(x = SMV,
              y = `Std Hrs`)) +
   geom_point() +
   theme_bw()
 # no linear relationship
 
-data %>% 
+data_descriptive |>
+  na.omit() |>
   ggplot(aes(x = `Order Qty`,
              y = Earnings)) +
   geom_point() +
   theme_bw()
 # has linear relationship
 
-data %>% 
+data_descriptive |>
+  na.omit() |>
   ggplot(aes(x = `Order Qty`,
              y = `Std Hrs`)) +
   geom_point() +
   theme_bw()
 # has linear relationship
 
-data %>% 
+data_descriptive |>
+  na.omit() |>
   ggplot(aes(x = Earnings,
              y = `Std Hrs`)) +
   geom_point() +
@@ -205,10 +213,11 @@ data %>%
 # `Order Qty` and Earnings were selected
 
 
-# slide number: 53
+# slide number: 54
 
 # scatterplot
-data %>% 
+data_descriptive |> 
+  na.omit() |>
   ggplot(aes(x = `Order Qty`,
              y = Earnings)) +
   geom_point(col = "brown") +
@@ -219,9 +228,12 @@ data %>%
 # positive linear relationship
 
 # correlation value
-cor(x = data$`Order Qty`,
-    y = data$Earnings)
+cor(x = data_descriptive$`Order Qty`,
+    y = data_descriptive$Earnings)
 # r = 0.9371457
+
+
+
 
 
 
