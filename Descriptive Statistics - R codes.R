@@ -5,7 +5,7 @@ library(ggplot2)
 library(magrittr)
 library(DescTools)
 
-data_descriptive <- read_xlsx("Pre Order Profitability 2023 - Descriptive.xlsx")
+data_descriptive <- read_xlsx("Descriptive Statistics - Data.xlsx")
 
 View(data_descriptive)
 
