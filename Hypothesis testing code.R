@@ -4,6 +4,9 @@
 
 # Loading libraries
 library(readxl)
+library(ggplot2)
+library(magrittr)
+library(dplyr)
 
 # loading dataset
 Hypothesis.data <- read_excel("Hypothesis Data.xlsx")
@@ -44,7 +47,7 @@ two.sample.data <- Hypothesis.data %>% filter(Product.name %in% c("Hoody", "T-sh
 
 # Normal probability plot
 ggplot(two.sample.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
-  stat_qq_line() + facet_grid(.~Product.name)
+  stat_qq_line() + facet_grid(.~Product.name) +
   labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
 
 # Normality test
