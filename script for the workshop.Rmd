@@ -21,217 +21,6 @@ library(DescTools) # to obtain the mode
 
 ```
 
-
-# Multiple linear regression analysis
-
-Example:  
-Suppose we aim to identify the factors affecting earnings from the product sales in the apparel industry. To examine the relationship between selected variables and earnings, we will conduct a multiple regression analysis. For this analysis, we will utilize the variables Earnings, MOH Value, and Std Hrs. The response variable is earnings whereas MOH Value and Std Hrs are the predictor variables.
-
-
-```{r}
-# load the data set
-MAS_data_set <- read_excel("data set 2.xlsx")
-
-# create a data set for regression analysis
-Reg_data <- MAS_data_set %>%
-  select(`MOH Value`, `Earnings`,`Std Hrs`) 
-
-```
-
-### Check the linearity assumption
-
-```{r}
-# scatter plot of Earnings and Standard Hours
-
-ggplot(Reg_data, aes(x=`Std Hrs`, y= Earnings)) + 
-  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+  
-  ggtitle("Scatterplot of Earnings and Standard Hours")
-
-
-# scatter plot of Earnings and MOH Value
-
-ggplot(Reg_data, aes(x=`MOH Value`, y= Earnings)) + 
-  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+    
-  ggtitle("Scatterplot of Earnings and MOH Value")
-```
-
-
-
-## Fit the model
-
-```{r pressure, echo=FALSE}
-model_reg <- lm(Earnings ~ `Std Hrs`+ `MOH Value`, data = Reg_data)
-summary(model_reg)
-```
-
-## Checking assumptions
-
-### Check the multicollinearity assumption
-
-```{r}
-
-vif(model_reg)  # Since VIF values are less than 10, we can avoid the multicollinearity                   in the fitted model.
-
-```
-
-### Check the constant variance assumption of residuals
-
-```{r}
-
-# obtain the residuals
-residuals <- resid(model_reg)
-
-# residual vs. fitted value plot
-plot(fitted(model_reg), residuals) + title("Residual vs Fitted value plot")
-
-# add a horizontal line at 0 
-abline(0,0) 
-
-```
-
-### Check the normal assumption of residuals
-
-```{r}
-
-# Q-Q plot for residuals
-qqnorm(residuals)
-
-# add a straight diagonal line to the plot
-qqline(residuals) 
-
-```
-
-
-\newpage
-
-# Hypothesis Testing
-
-## One sample test for mean - Slide no 61
-
-Example: 
-Suppose we want to test whether the mean earnings per hour for  Outer Known customer group is less than 50 at 5% significance level. 
-
-```{r}
-# loading dataset
-Hypothesis.data <- read_excel("Hypothesis Data.xlsx")
-```
-
-### Step 1: Check whether Earnings per hour values are normally distributed
-
-
-**Normal probability plot**
-
-```{r}
-ggplot(Hypothesis.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
-  stat_qq_line() +
-  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
-```
-
-
-**Normality test**
-
-```{r}
-shapiro.test(Hypothesis.data$Earnings.per.hour)
-```
-
-
-Hypothesis to be tested:
-
-H0: Data are normally distributed.
-
-H1: Data are not normally distributed.
-
-According to the Shapiro-Wilk normality test p-value = 0.3806 > 0.05.
-
-Hence, We can conclude that Earnings per hour values are normally distributed.
-
-### Step 2: Perform the t-test
-
-```{r}
-t.test(Hypothesis.data$Earnings.per.hour, alternative = "less", mu = 50)
-```
-
-Since p-value = 1.89e-08 < 0.05, we reject null hypothesis.
-
-Hence, there is sufficient evidence to suggest that the mean earnings per hour for the Outer Known customer group is less than 50.
-
-
-## Two sample test for comparison between means - Slide no 63
-
-Example:
-Suppose we want test whether there is a significant difference in earnings per hour between Hoody products and T-shirt products of Outer Known customer group at 5% significance level. 
-
-```{r}
-# Loading relevant data
-two.sample.data <- Hypothesis.data %>% filter(Product.name %in% c("Hoody", "T-shirt"))
-```
-
-
-### Step 1: Check whether Earnings per hour values are normally distributed
-
-**Normal probability plot**
-
-```{r}
-ggplot(two.sample.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
-  stat_qq_line() + facet_grid(.~Product.name) +
-  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
-```
-
-
-**Normality test**
-
-```{r}
-test1 <- two.sample.data %>% filter(Product.name == "Hoody")
-shapiro.test(test1$Earnings.per.hour)
-  
-test2 <- two.sample.data %>% filter(Product.name == "T-shirt")
-shapiro.test(test2$Earnings.per.hour)
-```
-
-
-Hypothesis to be tested:
-
-H0: Data are normally distributed.
-
-H1: Data are not normally distributed.
-
-According to the Shapiro-Wilk normality test both p-values > 0.05.
-
-Hence, We can conclude that Earnings per hour values of the two categories are normally distributed.
-
-### Step 2: Check for equality of variance
-
-```{r}
-var.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
-         alternative = "two.sided")
-```
-
-
-Hypothesis to be tested:
-
-H0: Two population variances are equal.
-
-H1: Two population variances are not equal.
-
-According to the F test both p-values = 0.5739 > 0.05.
-
-Hence, We can conclude that Two population variances are equal.
-
-### Step 3: Perform the t-test
-
-```{r}
-t.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
-       alternative = "two.sided", var.equal = TRUE)
-```
-
-
-Since p-value = 0.2524 > 0.05, we do not reject null hypothesis.
-
-Hence, there is sufficient evidence to conclude that there is a significant difference in earnings per hour between the two product types.
-
-
-\newpage
-
 # Descriptive Statistics
 
 ## Load the data
@@ -251,7 +40,7 @@ glimpse(data_descriptive)
 
 ```
 
-\newpage
+\vspace{36pt}
 
 # slide number: 39
 # one way frequency table
@@ -315,7 +104,7 @@ data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
 
 ```
 
-\newpage
+\vspace{36pt}
 
 # slide number: 42
 # summary measures
@@ -500,5 +289,216 @@ cor(x = data_descriptive$`Order Qty`,
 # r = 0.9371457
 
 ```
+
+
+\newpage
+
+# Hypothesis Testing
+
+## One sample test for mean - Slide no 61
+
+Example: 
+Suppose we want to test whether the mean earnings per hour for  Outer Known customer group is less than 50 at 5% significance level. 
+
+```{r}
+# loading dataset
+Hypothesis.data <- read_excel("Hypothesis Data.xlsx")
+```
+
+### Step 1: Check whether Earnings per hour values are normally distributed
+
+
+**Normal probability plot**
+
+```{r}
+ggplot(Hypothesis.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
+  stat_qq_line() +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+```
+
+
+**Normality test**
+
+```{r}
+shapiro.test(Hypothesis.data$Earnings.per.hour)
+```
+
+
+Hypothesis to be tested:
+
+H0: Data are normally distributed.
+
+H1: Data are not normally distributed.
+
+According to the Shapiro-Wilk normality test p-value = 0.3806 > 0.05.
+
+Hence, We can conclude that Earnings per hour values are normally distributed.
+
+### Step 2: Perform the t-test
+
+```{r}
+t.test(Hypothesis.data$Earnings.per.hour, alternative = "less", mu = 50)
+```
+
+Since p-value = 1.89e-08 < 0.05, we reject null hypothesis.
+
+Hence, there is sufficient evidence to suggest that the mean earnings per hour for the Outer Known customer group is less than 50.
+
+
+## Two sample test for comparison between means - Slide no 63
+
+Example:
+Suppose we want test whether there is a significant difference in earnings per hour between Hoody products and T-shirt products of Outer Known customer group at 5% significance level. 
+
+```{r}
+# Loading relevant data
+two.sample.data <- Hypothesis.data %>% filter(Product.name %in% c("Hoody", "T-shirt"))
+```
+
+
+### Step 1: Check whether Earnings per hour values are normally distributed
+
+**Normal probability plot**
+
+```{r}
+ggplot(two.sample.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
+  stat_qq_line() + facet_grid(.~Product.name) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+```
+
+
+**Normality test**
+
+```{r}
+test1 <- two.sample.data %>% filter(Product.name == "Hoody")
+shapiro.test(test1$Earnings.per.hour)
+  
+test2 <- two.sample.data %>% filter(Product.name == "T-shirt")
+shapiro.test(test2$Earnings.per.hour)
+```
+
+
+Hypothesis to be tested:
+
+H0: Data are normally distributed.
+
+H1: Data are not normally distributed.
+
+According to the Shapiro-Wilk normality test both p-values > 0.05.
+
+Hence, We can conclude that Earnings per hour values of the two categories are normally distributed.
+
+### Step 2: Check for equality of variance
+
+```{r}
+var.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
+         alternative = "two.sided")
+```
+
+
+Hypothesis to be tested:
+
+H0: Two population variances are equal.
+
+H1: Two population variances are not equal.
+
+According to the F test both p-values = 0.5739 > 0.05.
+
+Hence, We can conclude that Two population variances are equal.
+
+### Step 3: Perform the t-test
+
+```{r}
+t.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
+       alternative = "two.sided", var.equal = TRUE)
+```
+
+
+Since p-value = 0.2524 > 0.05, we do not reject null hypothesis.
+
+Hence, there is sufficient evidence to conclude that there is a significant difference in earnings per hour between the two product types.
+
+
+# Multiple linear regression analysis
+
+Example:  
+Suppose we aim to identify the factors affecting earnings from the product sales in the apparel industry. To examine the relationship between selected variables and earnings, we will conduct a multiple regression analysis. For this analysis, we will utilize the variables Earnings, MOH Value, and Std Hrs. The response variable is earnings whereas MOH Value and Std Hrs are the predictor variables.
+
+
+```{r}
+# load the data set
+MAS_data_set <- read_excel("data set 2.xlsx")
+
+# create a data set for regression analysis
+Reg_data <- MAS_data_set %>%
+  select(`MOH Value`, `Earnings`,`Std Hrs`) 
+
+```
+
+### Check the linearity assumption
+
+```{r}
+# scatter plot of Earnings and Standard Hours
+
+ggplot(Reg_data, aes(x=`Std Hrs`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+  
+  ggtitle("Scatterplot of Earnings and Standard Hours")
+
+
+# scatter plot of Earnings and MOH Value
+
+ggplot(Reg_data, aes(x=`MOH Value`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+    
+  ggtitle("Scatterplot of Earnings and MOH Value")
+```
+
+
+
+## Fit the model
+
+```{r pressure, echo=FALSE}
+model_reg <- lm(Earnings ~ `Std Hrs`+ `MOH Value`, data = Reg_data)
+summary(model_reg)
+```
+
+## Checking assumptions
+
+### Check the multicollinearity assumption
+
+```{r}
+
+vif(model_reg)  # Since VIF values are less than 10, we can avoid the multicollinearity                   in the fitted model.
+
+```
+
+### Check the constant variance assumption of residuals
+
+```{r}
+
+# obtain the residuals
+residuals <- resid(model_reg)
+
+# residual vs. fitted value plot
+plot(fitted(model_reg), residuals) + title("Residual vs Fitted value plot")
+
+# add a horizontal line at 0 
+abline(0,0) 
+
+```
+
+### Check the normal assumption of residuals
+
+```{r}
+
+# Q-Q plot for residuals
+qqnorm(residuals)
+
+# add a straight diagonal line to the plot
+qqline(residuals) 
+
+```
+
+
+
 
 
