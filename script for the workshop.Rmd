@@ -12,11 +12,12 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, comment = NA)
 ```{r}
 # load the packages
 
-library(readxl)   # to load the data set 
-library(dplyr)    # select operator
-library(ggplot2)  # to create plots
-library(magrittr) # pipe operator
-library(car)      # to obtain vif value
+library(readxl)    # to load the data set 
+library(dplyr)     # select operator
+library(ggplot2)   # to create plots
+library(magrittr)  # pipe operator
+library(car)       # to obtain vif value
+library(DescTools) # to obtain the mode
 
 ```
 
@@ -229,20 +230,275 @@ Since p-value = 0.2524 > 0.05, we do not reject null hypothesis.
 Hence, there is sufficient evidence to conclude that there is a significant difference in earnings per hour between the two product types.
 
 
+\newpage
+
+# Descriptive Statistics
+
+## Load the data
+
+```{r}
+
+data_descriptive <- read_xlsx("Descriptive Statistics - Data.xlsx")
+
+```
 
 
+## Glimpse on the dataset
 
+```{r}
 
+glimpse(data_descriptive)
 
+```
 
+\newpage
 
+# slide number: 39
+# one way frequency table
 
+```{r}
 
+table(data_descriptive$`Shipping Type`)
 
+```
 
+\newpage
 
+# slide number: 40
+# barchart
 
+```{r}
 
+data_descriptive %>%
+  select(`Shipping Type`) %>%
+  na.omit() %>%
+  ggplot(aes(x = as.factor(`Shipping Type`))) +
+  geom_bar(color="black", 
+           fill="brown" ) +
+  theme_bw() +
+  labs(title = "Composition of the sample by Shipping Type",
+       x = "Shipping Type",
+       y = "Frequency") 
 
+```
+
+\newpage
+
+# slide number: 41
+# pie chart
+
+```{r}
+
+data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
+           Frequency = c(87, 86, 937)) %>%
+  ggplot(aes(x = "",
+             y = Frequency,
+             fill = Shipping_Type)) +
+  geom_bar(stat="identity", 
+           width=1) +
+  coord_polar("y", 
+              start=0) + 
+  geom_text(aes(label = paste0(
+    round((Frequency/sum(Frequency))*100), "%")), 
+    position = position_stack(vjust = 0.5)) +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = NULL, 
+       y = NULL, 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type") +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 42
+# summary measures
+
+```{r}
+
+# mean
+mean(data_descriptive$SMV, 
+     na.rm = TRUE)
+
+# median
+median(data_descriptive$SMV,
+       na.rm = TRUE)
+
+# mode
+Mode(data_descriptive$SMV, 
+     na.rm = TRUE)
+
+```
+
+\newpage
+
+# slide number: 43
+# histogram
+
+```{r}
+
+data_descriptive %>%
+  select(SMV) %>%
+  na.omit() %>%
+  ggplot(aes(x = SMV)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of SMV",
+       x = "SMV",
+       y = "Frequency")
+
+```
+
+\newpage
+
+# slide number: 44
+# boxplot
+
+```{r}
+
+data_descriptive %>%
+  select(SMV) %>%
+  na.omit() %>%
+  ggplot(aes(x = SMV)) +
+  geom_boxplot(color = "black", 
+               fill = "brown" ) +
+  theme_bw() +
+  labs(title = "Distribution of SMV")
+
+```
+
+\newpage
+
+# slide number: 47
+# two way frequency table
+
+```{r}
+
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant)
+
+```
+
+\newpage
+
+# slide number: 48
+# cluster bar chart
+
+```{r}
+
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant) %>%
+  as.data.frame() %>%
+  ggplot(aes(x = Var2, y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "Plant", 
+       y = "Frequency", 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 49
+# stacked bar chart
+
+```{r}
+
+data_descriptive %>%
+  na.omit() %>%
+  ggplot(aes(x = Plant, y = "", fill = `Shipping Type`)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  scale_fill_manual(values = c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "Plant", 
+       y = "Frequency", 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 50
+# scatterplot 
+
+```{r}
+
+data_descriptive %>%
+  ggplot(aes(x = `Order Qty`,
+             y = Earnings)) +
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of Order Quantity and Earnings",
+       x = "Order Quantity",
+       y = "Earnings")
+
+```
+
+\newpage
+
+# slide number: 51
+# boxplot with groups
+
+```{r}
+
+data_descriptive %>%
+  select(SMV, 
+         `Shipping Type`) %>%
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = `Shipping Type`,
+             fill = `Shipping Type`)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "SMV", 
+       y = "Shipping Type", 
+       fill = "Shipping Type", 
+       title = "Distribution of SMV by Shipping Type") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# Correlation Analysis
+
+# slide number: 54
+
+```{r}
+
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = `Order Qty`,
+             y = Earnings)) +
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of Order Quantity and Earnings",
+       x = "Order Quantity",
+       y = "Earnings")
+# positive linear relationship
+
+```
+
+```{r}
+
+cor(x = data_descriptive$`Order Qty`,
+    y = data_descriptive$Earnings)
+# r = 0.9371457
+
+```
 
 
