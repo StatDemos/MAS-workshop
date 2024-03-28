@@ -1,0 +1,101 @@
+---
+title: "MAS Workshop"
+author: "Department of Statistics - USJ"
+date: "2024-03-28"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+```{r}
+# load the packages
+
+library(readxl)   # to load the data set 
+library(dplyr)    # select operator
+library(ggplot2)  # to create plots
+library(magrittr) # pipe operator
+library(car)      # to obtain vif value
+
+```
+
+
+# Multiple linear regression analysis
+
+Example:  
+Suppose we aim to identify the factors affecting earnings from the product sales in the apparel industry. To examine the relationship between selected variables and earnings, we will conduct a multiple regression analysis. For this analysis, we will utilize the variables Earnings, MOH Value, and Std Hrs. The response variable is earnings whereas MOH Value and Std Hrs are the predictor variables.
+
+
+```{r}
+# load the data set
+MAS_data_set <- read_excel("data set 2.xlsx")
+
+# create a data set for regression analysis
+Reg_data <- MAS_data_set %>%
+  select(`MOH Value`, `Earnings`,`Std Hrs`) 
+
+```
+
+### Check the linearity assumption
+
+```{r}
+# scatter plot of Earnings and Standard Hours
+
+ggplot(Reg_data, aes(x=`Std Hrs`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+  
+  ggtitle("Scatterplot of Earnings and Standard Hours")
+
+
+# scatter plot of Earnings and MOH Value
+
+ggplot(Reg_data, aes(x=`MOH Value`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+    
+  ggtitle("Scatterplot of Earnings and MOH Value")
+```
+
+
+
+## Fit the model
+
+```{r pressure, echo=FALSE}
+model_reg <- lm(Earnings ~ `Std Hrs`+ `MOH Value`, data = Reg_data)
+summary(model_reg)
+```
+
+## Checking assumptions
+
+### Check the multicollinearity assumption
+
+```{r}
+
+vif(model_reg)  # Since VIF values are less than 10, we can avoid the multicollinearity                   in the fitted model.
+
+```
+
+### Check the constant variance assumption of residuals
+
+```{r}
+
+# obtain the residuals
+residuals <- resid(model_reg)
+
+# residual vs. fitted value plot
+plot(fitted(model_reg), residuals) + title("Residual vs Fitted value plot")
+
+# add a horizontal line at 0 
+abline(0,0) 
+
+```
+
+### Check the normal assumption of residuals
+
+```{r}
+
+# Q-Q plot for residuals
+qqnorm(residuals)
+
+# add a straight diagonal line to the plot
+qqline(residuals) 
+
+```
