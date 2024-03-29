@@ -18,6 +18,7 @@ library(ggplot2)   # to create plots
 library(magrittr)  # pipe operator
 library(car)       # to obtain vif value
 library(DescTools) # to obtain the mode
+library(tidyr)
 
 ```
 
@@ -28,6 +29,10 @@ library(DescTools) # to obtain the mode
 ```{r}
 
 data_descriptive <- read_xlsx("Descriptive Statistics - Data.xlsx")
+
+trial <- read_excel("Pre Order Profitability 2023.xlsx")
+trial$Date <- as.character(trial$Date)
+trial <- trial %>% select(Date, `Customer Group`, Earnings, EPH)
 
 ```
 
@@ -40,7 +45,7 @@ glimpse(data_descriptive)
 
 ```
 
-# slide number: 41
+# slide number: 40
 # one way frequency table
 
 ```{r}
@@ -51,7 +56,7 @@ table(data_descriptive$`Shipping Type`)
 
 \newpage
 
-# slide number: 42
+# slide number: 41
 # barchart
 
 ```{r}
@@ -71,7 +76,7 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 43
+# slide number: 42
 # pie chart
 
 ```{r}
@@ -100,7 +105,7 @@ data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
 
 \vspace{36pt}
 
-# slide number: 44
+# slide number: 43
 # summary measures
 
 ```{r}
@@ -121,42 +126,70 @@ Mode(data_descriptive$SMV,
 
 \newpage
 
-# slide number: 45
-# histogram - asymmetric
+# slide number: 44
+# histogram - symmetric
 
 ```{r}
+# preparing data
+symmetric <- trial %>% filter(`Customer Group` == "Lands'End")
+outliers <- boxplot(symmetric$EPH, plot=FALSE)$out
+symmetric <- symmetric[-which(symmetric$EPH %in% outliers), ]
 
-data_descriptive %>%
-  select(SMV) %>%
-  na.omit() %>%
-  ggplot(aes(x = SMV)) +
+# histogram
+symmetric %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
   geom_histogram(color = "black", 
                  fill = "brown") +
   theme_bw() +
-  labs(title = "Distribution of SMV",
-       x = "SMV",
+  labs(title = "Distribution of EPH values for Lands'End Customer Group",
+       x = "Earnings per hour",
        y = "Frequency")
+```
 
+
+\newpage
+
+# slide number: 45
+# histogram - positively skewed
+
+```{r}
+# preparing data
+pos.skewed <- trial %>% filter(`Customer Group` == "SPEEDO NA")
+outliers <- boxplot(pos.skewed$EPH, plot=FALSE)$out
+pos.skewed <- pos.skewed[-which(pos.skewed$EPH %in% outliers), ]
+
+#histogram
+pos.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for SPEEDO Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
 ```
 
 \newpage
 
 # slide number: 46
-# histogram - positively skewed
+# histogram - negatively skewed
 
 ```{r}
+# preparing data
+neg.skewed <- trial %>% filter(`Customer Group` == "PELEG NIL LTD")
 
-data_descriptive %>%
-  select(`Order Qty`) %>%
-  na.omit() %>%
-  ggplot(aes(x = `Order Qty`)) +
+#histogram
+neg.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
   geom_histogram(color = "black", 
                  fill = "brown") +
   theme_bw() +
-  labs(title = "Distribution of Order Quatity",
-       x = "Order Quantity",
+  labs(title = "Distribution of EPH values for PELEG NIL LTD Customer Group",
+       x = "Earnings per hour",
        y = "Frequency")
-
 ```
 
 \newpage
@@ -290,6 +323,24 @@ data_descriptive %>%
        title = "Distribution of SMV by Shipping Type") +
   theme(legend.position = "bottom")
 
+```
+
+# slide number: 58
+# line chart
+
+```{r}
+# preparing data
+line_data <- trial %>% group_by(Date) %>% 
+  summarise(Mean.Earnings = mean(Earnings)) %>% drop_na()
+
+# line chart
+line_data %>%
+  ggplot(aes(x = Date, y = Mean.Earnings, group=1)) +
+  geom_line(color="brown", size=1) +
+  theme_bw() +
+  labs(title = "Line chart of mean earning values",
+       x = "Date",
+       y = "Average earnings")
 ```
 
 
