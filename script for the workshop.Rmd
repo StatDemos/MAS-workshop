@@ -40,9 +40,7 @@ glimpse(data_descriptive)
 
 ```
 
-\vspace{36pt}
-
-# slide number: 39
+# slide number: 41
 # one way frequency table
 
 ```{r}
@@ -53,7 +51,7 @@ table(data_descriptive$`Shipping Type`)
 
 \newpage
 
-# slide number: 40
+# slide number: 42
 # barchart
 
 ```{r}
@@ -73,27 +71,23 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 41
+# slide number: 43
 # pie chart
 
 ```{r}
 
 data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
            Frequency = c(87, 86, 937)) %>%
-  ggplot(aes(x = "",
-             y = Frequency,
+  ggplot(aes(x = "", y = Frequency,
              fill = Shipping_Type)) +
-  geom_bar(stat="identity", 
-           width=1) +
-  coord_polar("y", 
-              start=0) + 
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
   geom_text(aes(label = paste0(
     round((Frequency/sum(Frequency))*100), "%")), 
     position = position_stack(vjust = 0.5)) +
   theme_bw() +
   scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
-  labs(x = NULL, 
-       y = NULL, 
+  labs(x = NULL, y = NULL, 
        fill = "Shipping Type", 
        title = "Composition of the sample by Shipping Type") +
   theme(axis.line = element_blank(),
@@ -106,7 +100,7 @@ data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
 
 \vspace{36pt}
 
-# slide number: 42
+# slide number: 44
 # summary measures
 
 ```{r}
@@ -127,8 +121,8 @@ Mode(data_descriptive$SMV,
 
 \newpage
 
-# slide number: 43
-# histogram
+# slide number: 45
+# histogram - asymmetric
 
 ```{r}
 
@@ -147,7 +141,27 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 44
+# slide number: 46
+# histogram - positively skewed
+
+```{r}
+
+data_descriptive %>%
+  select(`Order Qty`) %>%
+  na.omit() %>%
+  ggplot(aes(x = `Order Qty`)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of Order Quatity",
+       x = "Order Quantity",
+       y = "Frequency")
+
+```
+
+\newpage
+
+# slide number: 47
 # boxplot
 
 ```{r}
@@ -165,7 +179,7 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 47
+# slide number: 51
 # two way frequency table
 
 ```{r}
@@ -177,29 +191,7 @@ table(data_descriptive$`Shipping Type`,
 
 \newpage
 
-# slide number: 48
-# cluster bar chart
-
-```{r}
-
-table(data_descriptive$`Shipping Type`, 
-      data_descriptive$Plant) %>%
-  as.data.frame() %>%
-  ggplot(aes(x = Var2, y = Freq, fill = Var1)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
-  theme_bw() +
-  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
-  labs(x = "Plant", 
-       y = "Frequency", 
-       fill = "Shipping Type", 
-       title = "Composition of the sample by Shipping Type and Plant") +
-  theme(legend.position = "bottom")
-
-```
-
-\newpage
-
-# slide number: 49
+# slide number: 52
 # stacked bar chart
 
 ```{r}
@@ -220,8 +212,30 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 50
-# scatterplot 
+# slide number: 53
+# cluster bar chart
+
+```{r}
+
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant) %>%
+  as.data.frame() %>%
+  ggplot(aes(x = Var2, y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity", position = position_dodge(), col = "black") +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "Plant", 
+       y = "Frequency", 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 54
+# scatterplot - positive linear
 
 ```{r}
 
@@ -238,7 +252,24 @@ data_descriptive %>%
 
 \newpage
 
-# slide number: 51
+# slide number: 55
+# scatterplot - no linear
+
+```{r}
+
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = Earnings))+
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of SMV and Earnings",
+       x = "SMV",
+       y = "Earnings")
+
+```
+
+# slide number: 56
 # boxplot with groups
 
 ```{r}
@@ -261,14 +292,16 @@ data_descriptive %>%
 
 ```
 
+
 \newpage
 
 # Correlation Analysis
 
-# slide number: 54
+# slide number: 63
 
 ```{r}
 
+# scatterplot - positive linear
 data_descriptive %>% 
   na.omit() %>%
   ggplot(aes(x = `Order Qty`,
@@ -280,13 +313,34 @@ data_descriptive %>%
        y = "Earnings")
 # positive linear relationship
 
-```
-
-```{r}
-
+# correlation value
 cor(x = data_descriptive$`Order Qty`,
     y = data_descriptive$Earnings)
 # r = 0.9371457
+
+```
+
+# slide number: 64
+
+```{r}
+
+# scatterplot - no linear
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = Earnings))+
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of SMV and Earnings",
+       x = "SMV",
+       y = "Earnings")
+# no linear relationship
+
+# correlation value
+cor(data_descriptive$SMV,
+    data_descriptive$Earnings,
+    use = "complete.obs")
+# 0.1142413
 
 ```
 
