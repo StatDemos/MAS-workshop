@@ -1,0 +1,611 @@
+---
+title: "MAS Workshop"
+author: "Department of Statistics - USJ"
+date: "2024-03-28"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, comment = NA)
+```
+
+```{r}
+# load the packages
+
+library(readxl)    # to load the data set 
+library(dplyr)     # select operator
+library(ggplot2)   # to create plots
+library(magrittr)  # pipe operator
+library(car)       # to obtain vif value
+library(DescTools) # to obtain the mode
+library(tidyr)
+
+```
+
+# Descriptive Statistics
+
+## Load the data
+
+```{r}
+
+data_descriptive <- read_xlsx("Updated data.xlsx")
+
+```
+
+
+## Glimpse on the dataset
+
+```{r}
+
+glimpse(data_descriptive)
+
+```
+
+# slide number: 40
+# one way frequency table
+
+```{r}
+
+table(data_descriptive$`Shipping Type`)
+
+```
+
+\newpage
+
+# slide number: 41
+# barchart
+
+```{r}
+
+data_descriptive %>%
+  select(`Shipping Type`) %>%
+  na.omit() %>%
+  ggplot(aes(x = as.factor(`Shipping Type`))) +
+  geom_bar(color="black", 
+           fill="brown" ) +
+  theme_bw() +
+  labs(title = "Composition of the sample by Shipping Type",
+       x = "Shipping Type",
+       y = "Frequency") 
+
+```
+
+\newpage
+
+# slide number: 42
+# pie chart
+
+```{r}
+
+data.frame(Shipping_Type = c("Air Collect", "Courier", "Sea Collect"),
+           Frequency = c(87, 86, 937)) %>%
+  ggplot(aes(x = "", y = Frequency,
+             fill = Shipping_Type)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) + 
+  geom_text(aes(label = paste0(
+    round((Frequency/sum(Frequency))*100), "%")), 
+    position = position_stack(vjust = 0.5)) +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = NULL, y = NULL, 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type") +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position = "bottom")
+
+```
+
+\vspace{36pt}
+
+# slide number: 43
+# summary measures
+
+```{r}
+
+# mean
+mean(data_descriptive$SMV, 
+     na.rm = TRUE)
+
+# median
+median(data_descriptive$SMV,
+       na.rm = TRUE)
+
+# mode
+Mode(data_descriptive$SMV, 
+     na.rm = TRUE)
+
+```
+
+\newpage
+
+# slide number: 44
+# histogram - symmetric
+
+```{r}
+# preparing data
+symmetric <- data_descriptive %>% filter(`Customer Group` == "Lands'End")
+outliers <- boxplot(symmetric$EPH, plot=FALSE)$out
+symmetric <- symmetric[-which(symmetric$EPH %in% outliers), ]
+
+# histogram
+symmetric %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for Lands'End Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
+```
+
+
+\newpage
+
+# slide number: 45
+# histogram - positively skewed
+
+```{r}
+# preparing data
+pos.skewed <- data_descriptive %>% filter(`Customer Group` == "SPEEDO NA")
+outliers <- boxplot(pos.skewed$EPH, plot=FALSE)$out
+pos.skewed <- pos.skewed[-which(pos.skewed$EPH %in% outliers), ]
+
+#histogram
+pos.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for SPEEDO Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
+```
+
+\newpage
+
+# slide number: 46
+# histogram - negatively skewed
+
+```{r}
+# preparing data
+neg.skewed <- data_descriptive %>% filter(`Customer Group` == "PELEG NIL LTD")
+
+#histogram
+neg.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for PELEG NIL LTD Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
+```
+
+\newpage
+
+# slide number: 47
+# boxplot
+
+```{r}
+
+data_descriptive %>%
+  select(SMV) %>%
+  na.omit() %>%
+  ggplot(aes(x = SMV)) +
+  geom_boxplot(color = "black", 
+               fill = "brown" ) +
+  theme_bw() +
+  labs(title = "Distribution of SMV")
+
+```
+
+\newpage
+
+# slide number: 51
+# two way frequency table
+
+```{r}
+
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant)
+
+```
+
+\newpage
+
+# slide number: 52
+# stacked bar chart
+
+```{r}
+
+data_descriptive %>%
+  na.omit() %>%
+  ggplot(aes(x = Plant, y = "", fill = `Shipping Type`)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  scale_fill_manual(values = c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "Plant", 
+       y = "Frequency", 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 53
+# cluster bar chart
+
+```{r}
+
+table(data_descriptive$`Shipping Type`, 
+      data_descriptive$Plant) %>%
+  as.data.frame() %>%
+  ggplot(aes(x = Var2, y = Freq, fill = Var1)) +
+  geom_bar(stat = "identity", position = position_dodge(), col = "black") +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "Plant", 
+       y = "Frequency", 
+       fill = "Shipping Type", 
+       title = "Composition of the sample by Shipping Type and Plant") +
+  theme(legend.position = "bottom")
+
+```
+
+\newpage
+
+# slide number: 54
+# scatterplot - positive linear
+
+```{r}
+
+data_descriptive %>%
+  ggplot(aes(x = `Order Qty`,
+             y = Earnings)) +
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of Order Quantity and Earnings",
+       x = "Order Quantity",
+       y = "Earnings")
+
+```
+
+\newpage
+
+# slide number: 55
+# scatterplot - no linear
+
+```{r}
+
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = Earnings))+
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of SMV and Earnings",
+       x = "SMV",
+       y = "Earnings")
+
+```
+
+# slide number: 56
+# boxplot with groups
+
+```{r}
+
+data_descriptive %>%
+  select(SMV, 
+         `Shipping Type`) %>%
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = `Shipping Type`,
+             fill = `Shipping Type`)) +
+  geom_boxplot() +
+  theme_bw() +
+  scale_fill_manual(values=c("brown3", "salmon2", "peachpuff3")) +
+  labs(x = "SMV", 
+       y = "Shipping Type", 
+       fill = "Shipping Type", 
+       title = "Distribution of SMV by Shipping Type") +
+  theme(legend.position = "bottom")
+
+```
+
+# slide number: 58
+# line chart
+
+```{r}
+# preparing data
+line_data <- trial %>% group_by(Date) %>% 
+  summarise(Mean.Earnings = mean(Earnings)) %>% drop_na()
+
+# line chart
+line_data %>%
+  ggplot(aes(x = Date, y = Mean.Earnings, group=1)) +
+  geom_line(color="brown", size=1) +
+  theme_bw() +
+  labs(title = "Line chart of mean earning values",
+       x = "Date",
+       y = "Average earnings")
+```
+
+
+\newpage
+
+# Correlation Analysis
+
+# slide number: 63
+
+```{r}
+
+# scatterplot - positive linear
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = `Order Qty`,
+             y = Earnings)) +
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of Order Quantity and Earnings",
+       x = "Order Quantity",
+       y = "Earnings")
+# positive linear relationship
+
+# correlation value
+cor(x = data_descriptive$`Order Qty`,
+    y = data_descriptive$Earnings)
+# r = 0.9371457
+
+```
+
+# slide number: 64
+
+```{r}
+
+# scatterplot - no linear
+data_descriptive %>% 
+  na.omit() %>%
+  ggplot(aes(x = SMV,
+             y = Earnings))+
+  geom_point(col = "brown") +
+  theme_bw() +
+  labs(title = "Scatterplot of SMV and Earnings",
+       x = "SMV",
+       y = "Earnings")
+# no linear relationship
+
+# correlation value
+cor(data_descriptive$SMV,
+    data_descriptive$Earnings,
+    use = "complete.obs")
+# 0.1142413
+
+```
+
+
+\newpage
+
+# Hypothesis Testing
+
+## One sample test for mean - Slide no 61
+
+Example: 
+Suppose we want to test whether the mean earnings per hour for  Outer Known customer group is less than 50 at 5% significance level. 
+
+```{r}
+# loading dataset
+Hypothesis.data <- read_excel("Hypothesis Data.xlsx")
+```
+
+### Step 1: Check whether Earnings per hour values are normally distributed
+
+
+**Normal probability plot**
+
+```{r}
+ggplot(Hypothesis.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
+  stat_qq_line() +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+```
+
+
+**Normality test**
+
+```{r}
+shapiro.test(Hypothesis.data$Earnings.per.hour)
+```
+
+
+Hypothesis to be tested:
+
+H0: Data are normally distributed.
+
+H1: Data are not normally distributed.
+
+According to the Shapiro-Wilk normality test p-value = 0.3806 > 0.05.
+
+Hence, We can conclude that Earnings per hour values are normally distributed.
+
+### Step 2: Perform the t-test
+
+```{r}
+t.test(Hypothesis.data$Earnings.per.hour, alternative = "less", mu = 50)
+```
+
+Since p-value = 1.89e-08 < 0.05, we reject null hypothesis.
+
+Hence, there is sufficient evidence to suggest that the mean earnings per hour for the Outer Known customer group is less than 50.
+
+
+## Two sample test for comparison between means - Slide no 63
+
+Example:
+Suppose we want test whether there is a significant difference in earnings per hour between Hoody products and T-shirt products of Outer Known customer group at 5% significance level. 
+
+```{r}
+# Loading relevant data
+two.sample.data <- Hypothesis.data %>% filter(Product.name %in% c("Hoody", "T-shirt"))
+```
+
+
+### Step 1: Check whether Earnings per hour values are normally distributed
+
+**Normal probability plot**
+
+```{r}
+ggplot(two.sample.data, aes(sample = Earnings.per.hour)) + stat_qq() + 
+  stat_qq_line() + facet_grid(.~Product.name) +
+  labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+```
+
+
+**Normality test**
+
+```{r}
+test1 <- two.sample.data %>% filter(Product.name == "Hoody")
+shapiro.test(test1$Earnings.per.hour)
+  
+test2 <- two.sample.data %>% filter(Product.name == "T-shirt")
+shapiro.test(test2$Earnings.per.hour)
+```
+
+
+Hypothesis to be tested:
+
+H0: Data are normally distributed.
+
+H1: Data are not normally distributed.
+
+According to the Shapiro-Wilk normality test both p-values > 0.05.
+
+Hence, We can conclude that Earnings per hour values of the two categories are normally distributed.
+
+### Step 2: Check for equality of variance
+
+```{r}
+var.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
+         alternative = "two.sided")
+```
+
+
+Hypothesis to be tested:
+
+H0: Two population variances are equal.
+
+H1: Two population variances are not equal.
+
+According to the F test both p-values = 0.5739 > 0.05.
+
+Hence, We can conclude that Two population variances are equal.
+
+### Step 3: Perform the t-test
+
+```{r}
+t.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
+       alternative = "two.sided", var.equal = TRUE)
+```
+
+
+Since p-value = 0.2524 > 0.05, we do not reject null hypothesis.
+
+Hence, there is sufficient evidence to conclude that there is a significant difference in earnings per hour between the two product types.
+
+
+# Multiple linear regression analysis
+
+Example:  
+Suppose we aim to identify the factors affecting earnings from the product sales in the apparel industry. To examine the relationship between selected variables and earnings, we will conduct a multiple regression analysis. For this analysis, we will utilize the variables Earnings, MOH Value, and Std Hrs. The response variable is earnings whereas MOH Value and Std Hrs are the predictor variables.
+
+
+```{r}
+# load the data set
+#MAS_data_set <- read_excel("data set 2.xlsx")
+MAS_data_set <- read_excel("Textile.xlsx")
+
+MAS_data_set <- MAS_data_set %>% rename(Earnings = Strength,
+                                        `MOH Value` = Elasticity,
+                                        `Std Hrs` = Temp)
+
+# create a data set for regression analysis
+Reg_data <- MAS_data_set %>%
+  select(`MOH Value`, `Earnings`,`Std Hrs`) 
+
+```
+
+### Check the linearity assumption
+
+```{r}
+# scatter plot of Earnings and Standard Hours
+
+ggplot(Reg_data, aes(x=`Std Hrs`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+  
+  ggtitle("Scatterplot of Earnings and Standard Hours")
+
+
+# scatter plot of Earnings and MOH Value
+
+ggplot(Reg_data, aes(x=`MOH Value`, y= Earnings)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red")+    
+  ggtitle("Scatterplot of Earnings and MOH Value")
+```
+
+
+
+## Fit the model
+
+```{r pressure, echo=FALSE}
+model_reg <- lm(Earnings ~ `Std Hrs`+ `MOH Value`, data = Reg_data)
+summary(model_reg)
+```
+
+## Checking assumptions
+
+### Check the multicollinearity assumption
+
+```{r}
+
+vif(model_reg)  # Since VIF values are less than 10, we can avoid the multicollinearity                   in the fitted model.
+
+```
+
+### Check the constant variance assumption of residuals
+
+```{r}
+
+# obtain the residuals
+residuals <- resid(model_reg)
+
+# residual vs. fitted value plot
+plot(fitted(model_reg), residuals) + title("Residual vs Fitted value plot")
+
+# add a horizontal line at 0 
+abline(0,0) 
+
+```
+
+### Check the normal assumption of residuals
+
+```{r}
+
+# Q-Q plot for residuals
+qqnorm(residuals)
+
+# add a straight diagonal line to the plot
+qqline(residuals) 
+
+shapiro.test(residuals)
+```
+
+
+
+
+

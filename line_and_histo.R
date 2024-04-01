@@ -26,6 +26,10 @@ symmetric %>%
        x = "Earnings per hour",
        y = "Frequency")
 
+mean(symmetric$EPH)
+median(symmetric$EPH)
+mode(symmetric$EPH)
+
 
 # histogram - positive skewed
 # preparing data
@@ -43,6 +47,20 @@ pos.skewed %>%
        x = "Earnings per hour",
        y = "Frequency")
 
+pos.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH, y = ..density..)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") + geom_density() +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for SPEEDO Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
+
+mean(pos.skewed$EPH)
+median(pos.skewed$EPH)
+mode(pos.skewed$EPH)
+
 
 # histogram - negatively skewed
 # preparing data
@@ -58,7 +76,19 @@ neg.skewed %>%
        x = "Earnings per hour",
        y = "Frequency")
 
+neg.skewed %>%
+  select(EPH) %>%
+  ggplot(aes(x = EPH, y = ..density..)) +
+  geom_histogram(color = "black", 
+                 fill = "brown") + geom_density() +
+  theme_bw() +
+  labs(title = "Distribution of EPH values for PELEG NIL LTD Customer Group",
+       x = "Earnings per hour",
+       y = "Frequency")
 
+mean(neg.skewed$EPH)
+median(neg.skewed$EPH)
+mode(neg.skewed$EPH)
 
 # Line chart
 # preparing data
