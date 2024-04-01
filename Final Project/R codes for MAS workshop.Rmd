@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE, comment = NA)
 ```{r, eval=FALSE}
 # install packages
 install.packages("readxl", "dplyr", "ggplot2", "magrittr", "car", "DescTools",
-                 "tidyr")
+                 "tidyr","janitor")
 ```
 
 
@@ -27,6 +27,7 @@ library(magrittr)  # pipe operator
 library(car)       # to obtain vif value
 library(DescTools) # to obtain the mode
 library(tidyr)
+library(janitor)
 
 ```
 
@@ -55,6 +56,8 @@ glimpse(data_descriptive)
 ```{r}
 
 table(data_descriptive$`Shipping Type`)
+tabyl(data_descriptive$`Shipping Type`,sort=TRUE,show_na = FALSE) 
+# to obtain tidy output
 
 ```
 
@@ -220,7 +223,11 @@ data_descriptive %>%
 # dot plot
 
 ```{r}
-
+data_descriptive %>%
+ggplot(aes(x = SMV)) +
+geom_dotplot(method="histodot", binwidth = 0.12,col = "brown") +
+labs(x = "SMV", y = "Count", title = "Distribution of SMV") +
+theme_bw()
 
 
 ```
@@ -539,5 +546,90 @@ Since p-value = 0.2524 > 0.05, we do not reject null hypothesis.
 Hence, there is sufficient evidence to conclude that there is a significant difference in earnings per hour between the two product types.
 
 
-# Multiple linear regression analysis - Slide no 83 
+# Simple linear regression analysis - Slide no 83 
 
+Example:  
+Suppose we aim to identify the factors affecting line efficiency in the apparel industry. To examine the relationship between selected variables and efficiency, we will conduct a multiple regression analysis. For this analysis, we will utilize the variables efficiency (Efficiency), and number of pieces per day (No. of pcs day). The response variable is efficiency whereas number of pieces per day is the predictor variables.
+
+
+```{r}
+# load the data set
+Reg_data <- read_excel("Textile.xlsx")
+```
+
+### Check the linearity assumption
+
+```{r}
+# scatter plot of Earnings and Standard Hours
+
+ggplot(Reg_data, aes(x=`No. of pcs day`, y=Efficiency)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") 
+  ggtitle("Scatterplot of Efficiency and No.of pieces per day")
+
+
+```
+
+## Fit the model
+
+```{r pressure, echo=FALSE}
+model1 <- lm(Efficiency~`No. of pcs day`, data = Reg_data)
+summary(model1)
+```
+
+According to the R^2 value, it can be said that 38.6% of 
+variation in efficiency can be explained by the fitted model. 
+
+## Checking assumptions
+
+### Check the constant variance assumption of residuals
+
+```{r}
+
+# obtain the residuals
+residuals <- resid(model1)
+
+plot(fitted(model1), residuals, xlab="Fitted values",ylab="Residuals",
+     main="Residual vs Fitted value plot", pch=20, cex=1)
+
+
+# add a horizontal line at 0 
+abline(0,0) 
+
+```
+
+According to the residual vs fitted value plot, it can be seen that data are scattered around 0 without any systematic pattern.  So,  it can be concluded 
+that the residuals  are independent and has a constant variance.  
+Therefore,  it can  be concluded that model adequately fit the data. 
+
+### Check the normal assumption of residuals
+
+```{r}
+
+# Q-Q plot for residuals
+qqnorm(residuals, pch=20)
+
+# add a straight diagonal line to the plot
+qqline(residuals) 
+
+# Normality test
+shapiro.test(residuals)
+
+```
+
+Hypothesis to be tested:
+
+H0: Residuals are normally distributed.
+
+H1: Residuals are not normally distributed.
+
+According to the Shapiro-Wilk normality test p-value = 0.3724 > 0.05.
+
+Hence, We can conclude that residuals are normally distributed.
+
+
+**Final fitted model for efficiency**
+
+Efficiency = 0.016 + 0.001 No. of pieces day 
+
+The model shows  that the number of pieces per day was positively related  with  efficiency. However,  the  contribution  from  this variable to  model was relatively small. This may be due to some other factors which are not 
+considered here, that affect efficiency. 

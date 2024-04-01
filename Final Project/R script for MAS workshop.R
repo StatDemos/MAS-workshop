@@ -1,6 +1,6 @@
 # install packages
 install.packages("readxl", "dplyr", "ggplot2", "magrittr", "car", "DescTools",
-                 "tidyr")
+                 "tidyr", "janitor")
 
 
 # load the packages
@@ -12,6 +12,7 @@ library(magrittr)  # pipe operator
 library(car)       # to obtain vif value
 library(DescTools) # to obtain the mode
 library(tidyr)
+library(janitor)
 
 
 
@@ -31,6 +32,8 @@ glimpse(data_descriptive)
 # one way frequency table
 
 table(data_descriptive$`Shipping Type`)
+tabyl(data_descriptive$`Shipping Type`,sort=TRUE,show_na = FALSE) 
+# to obtain tidy output
 
 
 # slide number: 44
@@ -162,9 +165,11 @@ data_descriptive %>%
 # slide number: 51
 # dot plot
 
-
-
-
+data_descriptive %>%
+  ggplot(aes(x = SMV)) +
+  geom_dotplot(method="histodot", binwidth = 0.12,col = "brown") +
+  labs(x = "SMV", y = "Count", title = "Distribution of SMV") +
+  theme_bw()
 
 # slide number: 54
 # two way frequency table
@@ -369,5 +374,49 @@ t.test(Earnings.per.hour ~ Product.name, data = two.sample.data,
        alternative = "two.sided", var.equal = TRUE)
 
 
-# Multiple linear regression analysis - Slide no 83
+# Simple linear regression analysis - Slide no 83
 
+# load the data set
+Reg_data <- read_excel("Textile.xlsx")
+
+# scatter plot of Earnings and Standard Hours
+
+ggplot(Reg_data, aes(x=`No. of pcs day`, y=Efficiency)) + 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") 
+ggtitle("Scatterplot of Efficiency and No.of pieces per day")
+
+## Fit the model
+
+model1 <- lm(Efficiency~`No. of pcs day`, data = Reg_data)
+summary(model1)
+
+## Checking assumptions
+
+### Check the constant variance assumption of residuals
+
+# obtain the residuals
+residuals <- resid(model1)
+
+### Check the constant variance assumption of residuals
+
+# obtain the residuals
+residuals <- resid(model1)
+
+plot(fitted(model1), residuals, xlab="Fitted values",ylab="Residuals",
+     main="Residual vs Fitted value plot", pch=20, cex=1)
+
+
+# add a horizontal line at 0 
+abline(0,0) 
+
+plot(fitted(model1), residuals, xlab="Fitted values",ylab="Residuals",
+     main="Residual vs Fitted value plot", pch=20, cex=1)
+
+# Q-Q plot for residuals
+qqnorm(residuals, pch=20)
+
+# add a straight diagonal line to the plot
+qqline(residuals) 
+
+# Normality test
+shapiro.test(residuals)
