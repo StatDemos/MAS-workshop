@@ -261,7 +261,7 @@ data_descriptive %>%
 # line chart
 
 # preparing data
-line_data <- trial %>% group_by(Date) %>% 
+line_data <- data_descriptive %>% group_by(Date) %>% 
   summarise(Mean.Earnings = mean(Earn)) %>% drop_na()
 
 # line chart
@@ -292,7 +292,8 @@ data_descriptive %>%
 
 # correlation value
 cor(x = data_descriptive$`Order Qty`,
-    y = data_descriptive$Earnings)
+    y = data_descriptive$Earnings,
+    use = "complete.obs")
 # r = 0.9371457
 
 # slide number: 66
@@ -382,7 +383,7 @@ Reg_data <- read_excel("Textile.xlsx")
 # scatter plot of Earnings and Standard Hours
 
 ggplot(Reg_data, aes(x=`No. of pcs day`, y=Efficiency)) + 
-  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") +
 ggtitle("Scatterplot of Efficiency and No.of pieces per day")
 
 ## Fit the model
@@ -420,3 +421,4 @@ qqline(residuals)
 
 # Normality test
 shapiro.test(residuals)
+

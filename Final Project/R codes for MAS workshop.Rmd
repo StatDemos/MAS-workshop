@@ -3,6 +3,7 @@ title: "MAS Workshop"
 author: "Department of Statistics - USJ"
 date: "2024-04-02"
 output: pdf_document
+font: 12pt
 ---
 
 ```{r setup, include=FALSE}
@@ -388,7 +389,8 @@ data_descriptive %>%
 
 # correlation value
 cor(x = data_descriptive$`Order Qty`,
-    y = data_descriptive$Earnings)
+    y = data_descriptive$Earnings,
+    use = "complete.obs")
 # r = 0.9371457
 
 ```
@@ -563,12 +565,13 @@ Reg_data <- read_excel("Textile.xlsx")
 # scatter plot of Earnings and Standard Hours
 
 ggplot(Reg_data, aes(x=`No. of pcs day`, y=Efficiency)) + 
-  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") 
+  geom_point() + geom_smooth(method = lm, se = FALSE, color = "red") +
   ggtitle("Scatterplot of Efficiency and No.of pieces per day")
 
 
 ```
 
+\newpage
 ## Fit the model
 
 ```{r pressure, echo=FALSE}
